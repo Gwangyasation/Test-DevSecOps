@@ -23,6 +23,6 @@ jobs:
       - name: Run new container
         run: |
           docker run -d \
-            -p 8080:8080 \
+            -p 3000:3000 \
             --name node-remote-test \
             node-remote-test

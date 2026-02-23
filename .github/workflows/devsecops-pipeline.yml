@@ -11,11 +11,8 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: 2. Build and Scan Image (Trivy)
-        run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/myapp:v1 .
-          # รัน Scan ก่อน Push
-          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image ${{ secrets.DOCKERHUB_USERNAME }}/myapp:v1
+      - name: Build Docker image
+        run: docker build -t node-remote-test . 
 
       - name: Stop and remove existing container
         run: |

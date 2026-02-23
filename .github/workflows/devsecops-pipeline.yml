@@ -2,8 +2,7 @@ name: DevSecOps CI Pipeline
 
 on:
   push:
-    branches:
-      - Lab1
+    branches: [ "main" ]
 
 jobs:
   build-and-push:

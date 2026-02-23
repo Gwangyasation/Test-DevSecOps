@@ -2,20 +2,15 @@ name: DevSecOps CI Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - Lab1
 
 jobs:
   build-and-push:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-
-      - name: 1. Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: 2. Build and Scan Image (Trivy)
         run: |
@@ -23,5 +18,14 @@ jobs:
           # รัน Scan ก่อน Push
           docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image ${{ secrets.DOCKERHUB_USERNAME }}/myapp:v1
 
-      - name: 3. Push Tagged Image to Registry
-        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/myapp:v1
+      - name: Stop and remove existing container
+        run: |
+          docker stop node-remote-test || true
+          docker rm node-remote-test || true
+
+      - name: Run new container
+        run: |
+          docker run -d \
+            -p 3000:3000 \
+            --name node-remote-test \
+            node-remote-test

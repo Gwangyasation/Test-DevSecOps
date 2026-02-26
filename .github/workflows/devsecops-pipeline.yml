@@ -17,6 +17,10 @@ jobs:
       # 2. Code Scan with SonarQube: ตรวจสอบคุณภาพโค้ด
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master
+        with:
+          args: >
+            -Dsonar.projectKey=ชื่อ_PROJECT_KEY_ที่คุณเพิ่งสร้าง
+            -Dsonar.organization=ชื่อ_ORGANIZATION_ของคุณ
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}

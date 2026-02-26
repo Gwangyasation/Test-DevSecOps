@@ -17,6 +17,10 @@ jobs:
       # 2. Code Scan with SonarQube: ตรวจสอบคุณภาพโค้ด
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master
+        with:
+          args: >
+            -Dsonar.projectKey=Gwangyasation_Test-DevSecOps
+            -Dsonar.organization=gwangyasation
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}

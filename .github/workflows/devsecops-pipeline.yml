@@ -19,8 +19,8 @@ jobs:
         uses: sonarsource/sonarqube-scan-action@master
         with:
           args: >
-            -Dsonar.projectKey=ชื่อ_PROJECT_KEY_ที่คุณเพิ่งสร้าง
-            -Dsonar.organization=ชื่อ_ORGANIZATION_ของคุณ
+            -Dsonar.projectKey=Gwangyasation_Test-DevSecOps
+            -Dsonar.organization=gwangyasation
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}

@@ -1,41 +1,59 @@
-name: DevSecOps CI Pipeline
+name: Lab 3 CI/CD Pipeline
 
 on:
   push:
-    branches: ["main"]
+    branches: [ "main" ]
 
 jobs:
-  build-and-push:
+  # --- JOB 1: ทำงานบน GitHub Hosted Runner ---
+  ci-process:
     runs-on: ubuntu-latest
     steps:
-      # 1. Checkout
-      - name: Checkout Code
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # 2. Code Scan with SonarQube: ตรวจสอบคุณภาพโค้ด
-      - name: SonarQube Scan
-        uses: sonarsource/sonarqube-scan-action@master
+      - name: Code Scan with Sonarqube
+        uses: SonarSource/sonarqube-scan-action@v5
         with:
           args: >
             -Dsonar.projectKey=Gwangyasation_Test-DevSecOps
             -Dsonar.organization=gwangyasation
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_HOST_URL: https://sonarcloud.io
 
-       # 3. Login to Docker Hub: เตรียมตัวสำหรับการ Push image
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # 4. Build Docker Image & Push to Registry
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/my-app:latest
+          # เปลี่ยน 'node-remote-test' เป็นชื่อ image ของคุณ
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/node-remote-test:latest
+
+  # --- JOB 2: ทำงานบน Self-hosted Runner (เครื่อง VM ของคุณ) ---
+  cd-process:
+    needs: ci-process # ต้องรอให้ Job 1 เสร็จก่อน
+    runs-on: self-hosted # ระบุให้รันบนเครื่อง VM ที่คุณต่อไว้
+    steps:
+      - name: Pull image from Docker Hub
+        run: docker pull ${{ secrets.DOCKERHUB_USERNAME }}/node-remote-test:latest
+
+      - name: Stop Old Container
+        run: |
+          docker stop my-app-container || true
+          docker rm my-app-container || true
+
+      - name: Start New Container
+        run: |
+          docker run -d \
+            --name my-app-container \
+            -p 3000:3000 \
+            ${{ secrets.DOCKERHUB_USERNAME }}/node-remote-test:latest

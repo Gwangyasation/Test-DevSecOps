@@ -36,7 +36,7 @@ jobs:
           context: .
           push: true
           # เปลี่ยน 'node-remote-test' เป็นชื่อ image ของคุณ
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/gwangyasation/my-app:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/gwangyasation/node-remote-test:latest
 
   # --- JOB 2: ทำงานบน Self-hosted Runner (เครื่อง VM ของคุณ) ---
   cd-process:
@@ -44,7 +44,7 @@ jobs:
     runs-on: self-hosted # ระบุให้รันบนเครื่อง VM ที่คุณต่อไว้
     steps:
       - name: Pull image from Docker Hub
-        run: docker pull ${{ secrets.DOCKERHUB_USERNAME }}/gwangyasation/my-app:latest
+        run: docker pull ${{ secrets.DOCKERHUB_USERNAME }}/gwangyasation/node-remote-test:latest
 
       - name: Stop Old Container
         run: |
@@ -56,4 +56,4 @@ jobs:
           docker run -d \
             --name my-app-container \
             -p 3000:3000 \
-            ${{ secrets.DOCKERHUB_USERNAME }}/gwangyasation/my-app:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/gwangyasation/node-remote-test:latest

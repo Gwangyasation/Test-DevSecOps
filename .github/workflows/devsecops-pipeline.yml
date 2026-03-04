@@ -56,11 +56,11 @@ jobs:
       # 3. Roll out / Update to latest Container
       - name: Deploy to Kubernetes
         run: |
-          # สั่งให้ Kubernetes อัปเดต Image เป็นเวอร์ชันล่าสุด
+          # 1. สร้างหรืออัปเดต Deployment จากไฟล์ config (ต้องมีไฟล์นี้ในโปรเจกต์)
+          kubectl apply -f k8s/deployment.yaml
+          
+          # 2. สั่ง Restart เพื่อให้ดึง Image ล่าสุดมาใช้
           kubectl rollout restart deployment/my-app-deployment
           
-          # หรือถ้ายังไม่มีการสร้าง Deployment ให้ใช้คำสั่ง apply
-          # kubectl apply -f k8s/deployment.yaml
-          
-          # ตรวจสอบสถานะการ Rollout
+          # 3. รอตรวจสอบสถานะจนกว่าจะ Rollout สำเร็จ
           kubectl rollout status deployment/my-app-deployment

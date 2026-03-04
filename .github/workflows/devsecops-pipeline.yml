@@ -38,22 +38,29 @@ jobs:
           # เปลี่ยน 'node-remote-test' เป็นชื่อ image ของคุณ
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/node-remote-test:latest
 
-  # --- JOB 2: ทำงานบน Self-hosted Runner (เครื่อง VM ของคุณ) ---
+# --- JOB 2: CD Process บน Self-hosted Runner (Lab 4) ---
   cd-process:
-    needs: ci-process # ต้องรอให้ Job 1 เสร็จก่อน
-    runs-on: self-hosted # ระบุให้รันบนเครื่อง VM ที่คุณต่อไว้
+    needs: ci-process
+    runs-on: self-hosted
     steps:
+      # 1. Pull image ล่าสุดลงเครื่อง VM
       - name: Pull image from Docker Hub
         run: docker pull ${{ secrets.DOCKERHUB_USERNAME }}/node-remote-test:latest
 
-      - name: Stop Old Container
+      # 2. Check Minikube status
+      - name: Check Minikube status
         run: |
-          docker stop my-app-container || true
-          docker rm my-app-container || true
+          minikube status || minikube start
+          kubectl cluster-info
 
-      - name: Start New Container
+      # 3. Roll out / Update to latest Container
+      - name: Deploy to Kubernetes
         run: |
-          docker run -d \
-            --name my-app-container \
-            -p 3000:3000 \
-            ${{ secrets.DOCKERHUB_USERNAME }}/node-remote-test:latest
+          # สั่งให้ Kubernetes อัปเดต Image เป็นเวอร์ชันล่าสุด
+          kubectl rollout restart deployment/my-app-deployment
+          
+          # หรือถ้ายังไม่มีการสร้าง Deployment ให้ใช้คำสั่ง apply
+          # kubectl apply -f k8s/deployment.yaml
+          
+          # ตรวจสอบสถานะการ Rollout
+          kubectl rollout status deployment/my-app-deployment

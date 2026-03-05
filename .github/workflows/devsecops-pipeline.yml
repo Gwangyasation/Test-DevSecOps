@@ -64,7 +64,7 @@ jobs:
           kubectl apply -f k8s/deployment.yaml
           
           # 2. สั่ง Restart เพื่อให้ดึง Image ล่าสุดมาใช้
-          kubectl rollout restart deployment/my-app-deployment
+          kubectl rollout restart deployment/myapp-deployment
           
           # 3. รอตรวจสอบสถานะจนกว่าจะ Rollout สำเร็จ
-          kubectl rollout status deployment/my-app-deployment
+          kubectl rollout status deployment/myapp-deployment

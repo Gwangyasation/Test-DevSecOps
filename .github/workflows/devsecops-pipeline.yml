@@ -43,6 +43,10 @@ jobs:
     needs: ci-process
     runs-on: self-hosted
     steps:
+      # --- เพิ่มขั้นตอนนี้เพื่อให้ VM มีไฟล์ล่าสุดจาก Git ---
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        
       # 1. Pull image ล่าสุดลงเครื่อง VM
       - name: Pull image from Docker Hub
         run: docker pull ${{ secrets.DOCKERHUB_USERNAME }}/node-remote-test:latest

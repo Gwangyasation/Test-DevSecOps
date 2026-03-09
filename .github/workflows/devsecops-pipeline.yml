@@ -63,3 +63,8 @@ jobs:
 
           # รอตรวจสอบสถานะจนกว่าจะ Rollout สำเร็จ
           kubectl rollout status deployment/myapp-deployment
+
+    # 4. Forward port for Kubernetes
+      - name: Forward Port for Kubernetes
+        run: |
+          kubectl port-forward --address 0.0.0.0 service/myapp-service 30010:80

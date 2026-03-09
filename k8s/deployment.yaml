@@ -28,5 +28,6 @@ spec:
     app: myapp
   ports:
     - protocol: TCP
-      port: 80
-      targetPort: 3000
+      port: 80        # เลข port ของ pod
+      targetPort: 3000 # เลข port ของ container (Nodejs)
+      nodePort: 30010 # เลข port ที่จะให้คนนอกเข้ามาเห็น

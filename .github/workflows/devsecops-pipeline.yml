@@ -67,4 +67,8 @@ jobs:
     # 4. Forward port for Kubernetes
       - name: Forward Port for Kubernetes
         run: |
-          kubectl port-forward --address 0.0.0.0 service/myapp-service 30010:80
+          # 1. ค้นหาและปิดการทำงานของ port-forward ตัวเก่าก่อน (ถ้ามี)
+          pkill -f "kubectl port-forward.*30010" || true
+
+          # 2. รันคำสั่ง port-forward ใหม่
+          nohup kubectl port-forward --address 0.0.0.0 service/myapp-service 30010:80 > /dev/null 2>&1 &

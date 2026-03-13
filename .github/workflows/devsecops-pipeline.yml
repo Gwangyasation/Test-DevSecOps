@@ -34,12 +34,14 @@ jobs:
       # --- เพิ่มขั้นตอนสแกน TMAS ผ่าน TrendMicro ---
       - name: Scan Image with TMAS
         run: |
-          # ใช้ Docker รัน TMAS Scanner โดยตรงเพื่อเลี่ยงปัญหาการติดตั้ง CLI
-          docker run --rm \
-            -e TMAS_API_KEY=${{ secrets.TMAS_API_KEY }} \
-            trendmicro/tmas scan \
-            --region ap-southeast-1 \
-            docker:gwangyasation/node-remote-test:latest
+          # 1. ดาวน์โหลด TMAS CLI โดยตรงจาก GitHub Release (วิธีที่แน่นอนที่สุด)
+          curl -L https://github.com/trendmicro/tmas-cli/releases/latest/download/tmas-linux-amd64 -o tmas
+          chmod +x tmas
+          
+          # 2. รันการสแกน (ระบุ Region ของคุณ เช่น ap-southeast-1 สำหรับสิงคโปร์)
+          ./tmas scan docker:gwangyasation/node-remote-test:latest --region ap-southeast-1
+        env:
+          TMAS_API_KEY: ${{ secrets.TMAS_API_KEY }}
 
   # --- JOB 2: CD Process บน Self-hosted Runner ---
   cd-process:

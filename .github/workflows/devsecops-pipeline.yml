@@ -80,7 +80,8 @@ jobs:
         run: |
           # 1. ค้นหาและปิดการทำงานของ port-forward ตัวเก่าก่อน (ถ้ามี)
           pkill -f "kubectl port-forward" || true
+          # 2. ปิด process ที่ใช้ port 30010 อยู่
+          fuser -k 30010/tcp || true
           sleep 2
-
-          # 2. รันคำสั่ง port-forward ใหม่
-          kubectl port-forward --address 0.0.0.0 service/myapp-service 30010:80 &
+          # 3. รัน port-forward ใหม่
+          kubectl port-forward --address 0.0.0.0 service/myapp-service 30011:80 &

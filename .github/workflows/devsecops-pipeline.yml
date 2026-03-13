@@ -31,6 +31,14 @@ jobs:
           context: .
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/node-remote-test:latest
+      # --- เพิ่มขั้นตอนสแกน TMAS ผ่าน TrendMicro ---
+      - name: Scan Image with TMAS
+        uses: trendmicro/tmas-scan-action@v1
+        with:
+          image: ${{ secrets.DOCKERHUB_USERNAME }}/node-remote-test:latest
+          region: 'us-central1' # ปรับตาม Region ของ Vision One ที่คุณใช้งาน
+        env:
+          TMAS_API_KEY: ${{ secrets.TMAS_API_KEY }} # อย่าลืมนำ API Key ไปใส่ใน GitHub Secrets
 
   # --- JOB 2: CD Process บน Self-hosted Runner ---
   cd-process:

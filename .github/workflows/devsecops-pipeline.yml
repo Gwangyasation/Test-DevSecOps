@@ -33,12 +33,14 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/node-remote-test:latest
       # --- เพิ่มขั้นตอนสแกน TMAS ผ่าน TrendMicro ---
       - name: Scan Image with TMAS
-        uses: trendmicro/tmas-scan-action@v1
-        with:
-          image: ${{ secrets.DOCKERHUB_USERNAME }}/node-remote-test:latest
-          region: 'us-central1' # ปรับตาม Region ของ Vision One ที่คุณใช้งาน
+        run: |
+          # 1. ติดตั้ง CLI (หากยังไม่มี)
+          curl -L https://raw.githubusercontent.com/trendmicro/tmas-cli/main/install.sh | sh
+          
+          # 2. รันการสแกนโดยระบุ Region ap-southeast-1
+          ./tmas scan docker:${{ secrets.DOCKERHUB_USERNAME }}/node-remote-test:latest --region ap-southeast-1
         env:
-          TMAS_API_KEY: ${{ secrets.TMAS_API_KEY }} # อย่าลืมนำ API Key ไปใส่ใน GitHub Secrets
+          TMAS_API_KEY: ${{ secrets.TMAS_API_KEY }}
 
   # --- JOB 2: CD Process บน Self-hosted Runner ---
   cd-process:

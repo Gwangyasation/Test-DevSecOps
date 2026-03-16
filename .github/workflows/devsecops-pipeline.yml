@@ -61,6 +61,7 @@ jobs:
       - name: Check Minikube status
         run: |
           minikube status || minikube start
+          kubectl wait --for=condition=Ready node/minikube --timeout=60s
           kubectl cluster-info
 
       # 3. Deploy to Kubernetes

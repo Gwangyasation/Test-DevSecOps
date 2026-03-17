@@ -37,11 +37,31 @@ jobs:
         with:
           version: 'latest'
           vulnerabilitiesScan: true
-          malwareScan: false
+          malwareScan: true
           artifact: registry:${{ secrets.DOCKERHUB_USERNAME }}/node-remote-test:latest
           additionalArgs: --region=ap-southeast-1
+                          --saveScanResult
           tmasApiKey: ${{ secrets.TMAS_API_KEY }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      # เพิ่ม step นี้ต่อท้าย เพื่อ fail pipeline เอง
+      - name: Check TMAS Result and Block if Unsafe
+        run: |
+          RESULT=$(cat tmas-scan-result.json)
+          CRITICAL=$(echo $RESULT | jq '.vulnerabilities.criticalCount // 0')
+          HIGH=$(echo $RESULT | jq '.vulnerabilities.highCount // 0')
+          MEDIUM=$(echo $RESULT | jq '.vulnerabilities.mediumCount // 0')
+    
+          echo "Critical: $CRITICAL"
+          echo "High: $HIGH"
+          echo "Medium: $MEDIUM"
+    
+          if [ "$CRITICAL" -gt 0 ] || [ "$HIGH" -gt 0 ] || [ "$MEDIUM" -gt 0 ]; then
+            echo "Found vulnerabilities! Blocking pipeline."
+          exit 1
+          fi
+    
+            echo "No critical/high/medium vulnerabilities found."
 
   # --- JOB 2: CD Process บน Self-hosted Runner ---
   cd-process:

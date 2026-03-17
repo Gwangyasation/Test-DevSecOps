@@ -58,11 +58,11 @@ jobs:
         run: docker pull ${{ secrets.DOCKERHUB_USERNAME }}/node-remote-test:latest
 
       # 2. Check Minikube status
-      - name: Check Minikube status
-        run: |
-          minikube status || minikube start
-          kubectl wait --for=condition=Ready node/minikube --timeout=60s
-          kubectl cluster-info
+      #- name: Check Minikube status
+      #  run: |
+      #    minikube status || minikube start
+      #    kubectl wait --for=condition=Ready node/minikube --timeout=60s
+      #    kubectl cluster-info
 
       # 3. Deploy to Kubernetes
       - name: Deploy to Kubernetes

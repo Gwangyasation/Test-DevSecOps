@@ -49,9 +49,16 @@ jobs:
       - name: Check TMAS Result and Block if Unsafe
         run: |
         
-          # ตรวจสอบว่าผลลัพธ์อยู่ที่ไหน
-          echo "=== Files in workspace ==="
-          ls -la *.json 2>/dev/null || echo "No JSON files found"
+          echo "=== Raw JSON keys ==="
+          cat tmas_scan_report.json | jq 'keys'
+
+          CRITICAL=$(cat tmas_scan_report.json | jq '.vulnerability.overallSummary.critical // 0')
+          HIGH=$(cat tmas_scan_report.json | jq '.vulnerability.overallSummary.high // 0')
+          MEDIUM=$(cat tmas_scan_report.json | jq '.vulnerability.overallSummary.medium // 0')
+
+          echo "Critical : $CRITICAL"
+          echo "High     : $HIGH"
+          echo "Medium   : $MEDIUM"
     
           # TMAS action v3 เก็บผลใน environment variable แทน
           echo "=== TMAS Scan Output ==="

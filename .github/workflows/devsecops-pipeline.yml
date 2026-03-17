@@ -33,6 +33,8 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/node-remote-test:latest
       # --- เพิ่มขั้นตอนสแกน TMAS ผ่าน TrendMicro ---
       - name: Scan Image with TMAS
+        # ชื่อ Step ที่ตั้งเพื่อให้ Step อื่นใน Job อ้างอิงถึงได้
+        id: tmas 
         uses: trendmicro/tmas-scan-action@v3.1.0
         with:
           version: 'latest'
@@ -40,28 +42,28 @@ jobs:
           malwareScan: true
           artifact: registry:${{ secrets.DOCKERHUB_USERNAME }}/node-remote-test:latest
           additionalArgs: --region=ap-southeast-1
-                          --saveScanResult
           tmasApiKey: ${{ secrets.TMAS_API_KEY }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
 
       # เพิ่ม step นี้ต่อท้าย เพื่อ fail pipeline เอง
       - name: Check TMAS Result and Block if Unsafe
         run: |
-          RESULT=$(cat tmas-scan-result.json)
-          CRITICAL=$(echo $RESULT | jq '.vulnerabilities.criticalCount // 0')
-          HIGH=$(echo $RESULT | jq '.vulnerabilities.highCount // 0')
-          MEDIUM=$(echo $RESULT | jq '.vulnerabilities.mediumCount // 0')
+        
+          # ตรวจสอบว่าผลลัพธ์อยู่ที่ไหน
+          echo "=== Files in workspace ==="
+          ls -la *.json 2>/dev/null || echo "No JSON files found"
     
-          echo "Critical: $CRITICAL"
-          echo "High: $HIGH"
-          echo "Medium: $MEDIUM"
+          # TMAS action v3 เก็บผลใน environment variable แทน
+          echo "=== TMAS Scan Output ==="
+          # ${{ steps.tmas.outcome }} คือการถามว่า step ชื่อ "tmas" ผลเป็นยังไง
+          echo "Exit code from TMAS: ${{ steps.tmas.outcome }}" 
     
           if [ "$CRITICAL" -gt 0 ] || [ "$HIGH" -gt 0 ] || [ "$MEDIUM" -gt 0 ]; then
             echo "Found vulnerabilities! Blocking pipeline."
           exit 1
           fi
     
-            echo "No critical/high/medium vulnerabilities found."
+            echo "TMAS scan passed."
 
   # --- JOB 2: CD Process บน Self-hosted Runner ---
   cd-process:

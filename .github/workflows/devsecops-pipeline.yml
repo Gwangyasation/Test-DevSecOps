@@ -54,9 +54,9 @@ jobs:
           echo "=== Raw JSON keys ==="
           cat tmas_scan_report.json | jq 'keys'
 
-          CRITICAL=$(cat tmas_scan_report.json | jq '.vulnerability.overallSummary.critical // 0')
-          HIGH=$(cat tmas_scan_report.json | jq '.vulnerability.overallSummary.high // 0')
-          MEDIUM=$(cat tmas_scan_report.json | jq '.vulnerability.overallSummary.medium // 0')
+          CRITICAL=$(cat tmas_scan_report.json | jq '.vulnerabilities.criticalCount // 0')
+          HIGH=$(cat tmas_scan_report.json | jq '.vulnerabilities.highCount // 0')
+          MEDIUM=$(cat tmas_scan_report.json | jq '.vulnerabilities.mediumCount // 0')
 
           echo "Critical : $CRITICAL"
           echo "High     : $HIGH"

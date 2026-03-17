@@ -48,6 +48,8 @@ jobs:
       # เพิ่ม step นี้ต่อท้าย เพื่อ fail pipeline เอง
       - name: Check TMAS Result and Block if Unsafe
         run: |
+          echo "=== Vulnerabilities structure ==="
+          cat tmas_scan_report.json | jq '.vulnerabilities'
         
           echo "=== Raw JSON keys ==="
           cat tmas_scan_report.json | jq 'keys'

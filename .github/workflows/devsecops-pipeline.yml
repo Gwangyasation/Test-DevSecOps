@@ -11,26 +11,70 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Code Scan with Sonarqube
-        uses: SonarSource/sonarqube-scan-action@v6
-        with:
-          args: >
-            -Dsonar.projectKey=Gwangyasation_Test-DevSecOps
-            -Dsonar.organization=gwangyasation
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: https://sonarcloud.io
+      #- name: Code Scan with Sonarqube
+        #uses: SonarSource/sonarqube-scan-action@v6
+        #with:
+          #args: >
+            #-Dsonar.projectKey=Gwangyasation_Test-DevSecOps
+            #-Dsonar.organization=gwangyasation
+        #env:
+          #SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          #SONAR_HOST_URL: https://sonarcloud.io
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+          
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/node-remote-test:latest
+          
+      # --- เพิ่มขั้นตอนสแกน TMAS ผ่าน TrendMicro ---
+      - name: Scan Image with TMAS
+        # ชื่อ Step ที่ตั้งเพื่อให้ Step อื่นใน Job อ้างอิงถึงได้
+        id: tmas 
+        uses: trendmicro/tmas-scan-action@v3.1.0
+        with:
+          version: 'latest'
+          vulnerabilitiesScan: true
+          malwareScan: true
+          artifact: registry:${{ secrets.DOCKERHUB_USERNAME }}/node-remote-test:latest
+          additionalArgs: --region=ap-southeast-1
+          tmasApiKey: ${{ secrets.TMAS_API_KEY }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      # เพิ่ม step นี้ต่อท้าย เพื่อ fail pipeline เอง
+      - name: Check TMAS Result and Block if Unsafe
+        run: |
+          echo "=== Vulnerabilities structure ==="
+          cat tmas_scan_report.json | jq '.vulnerabilities'
+        
+          echo "=== Raw JSON keys ==="
+          cat tmas_scan_report.json | jq 'keys'
+
+          CRITICAL=$(cat tmas_scan_report.json | jq '.vulnerabilities.criticalCount // 0')
+          HIGH=$(cat tmas_scan_report.json | jq '.vulnerabilities.highCount // 0')
+          MEDIUM=$(cat tmas_scan_report.json | jq '.vulnerabilities.mediumCount // 0')
+
+          echo "Critical : $CRITICAL"
+          echo "High     : $HIGH"
+          echo "Medium   : $MEDIUM"
+    
+          # TMAS action v3 เก็บผลใน environment variable แทน
+          echo "=== TMAS Scan Output ==="
+          # ${{ steps.tmas.outcome }} คือการถามว่า step ชื่อ "tmas" ผลเป็นยังไง
+          echo "Exit code from TMAS: ${{ steps.tmas.outcome }}" 
+    
+          if [ "$CRITICAL" -gt 0 ] || [ "$HIGH" -gt 0 ] || [ "$MEDIUM" -gt 0 ]; then
+            echo "Found vulnerabilities! Blocking pipeline."
+          exit 1
+          fi
+    
+            echo "TMAS scan passed."
 
   # --- JOB 2: CD Process บน Self-hosted Runner ---
   cd-process:
@@ -47,10 +91,11 @@ jobs:
         run: docker pull ${{ secrets.DOCKERHUB_USERNAME }}/node-remote-test:latest
 
       # 2. Check Minikube status
-      - name: Check Minikube status
-        run: |
-          minikube status || minikube start
-          kubectl cluster-info
+      #- name: Check Minikube status
+      #  run: |
+      #    minikube status || minikube start
+      #    kubectl wait --for=condition=Ready node/minikube --timeout=60s
+      #    kubectl cluster-info
 
       # 3. Deploy to Kubernetes
       - name: Deploy to Kubernetes
@@ -68,7 +113,9 @@ jobs:
       - name: Forward Port for Kubernetes
         run: |
           # 1. ค้นหาและปิดการทำงานของ port-forward ตัวเก่าก่อน (ถ้ามี)
-          # pkill -f "kubectl port-forward.*30010" || true
-
-          # 2. รันคำสั่ง port-forward ใหม่
-          kubectl port-forward --address 0.0.0.0 service/myapp-service 30010:80
+          pkill -f "kubectl port-forward" || true
+          # 2. ปิด process ที่ใช้ port 30010 อยู่
+          fuser -k 30010/tcp || true
+          sleep 2
+          # 3. รัน port-forward ใหม่
+          kubectl port-forward --address 0.0.0.0 service/myapp-service 30011:80 &

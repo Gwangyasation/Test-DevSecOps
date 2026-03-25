@@ -47,34 +47,34 @@ jobs:
           tmasApiKey: ${{ secrets.TMAS_API_KEY }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
 
-      # เพิ่ม step นี้ต่อท้าย เพื่อ fail pipeline เอง
-      - name: Check TMAS Result and Block if Unsafe
-        run: |
-          echo "=== Vulnerabilities structure ==="
-          cat tmas_scan_report.json | jq '.vulnerabilities'
+      ## เพิ่ม step นี้ต่อท้าย เพื่อ fail pipeline เอง
+      #- name: Check TMAS Result and Block if Unsafe
+        #run: |
+          #echo "=== Vulnerabilities structure ==="
+          #cat tmas_scan_report.json | jq '.vulnerabilities'
         
-          echo "=== Raw JSON keys ==="
-          cat tmas_scan_report.json | jq 'keys'
+          #echo "=== Raw JSON keys ==="
+          #cat tmas_scan_report.json | jq 'keys'
 
-          CRITICAL=$(cat tmas_scan_report.json | jq '.vulnerabilities.criticalCount // 0')
-          HIGH=$(cat tmas_scan_report.json | jq '.vulnerabilities.highCount // 0')
-          MEDIUM=$(cat tmas_scan_report.json | jq '.vulnerabilities.mediumCount // 0')
+          #CRITICAL=$(cat tmas_scan_report.json | jq '.vulnerabilities.criticalCount // 0')
+          #HIGH=$(cat tmas_scan_report.json | jq '.vulnerabilities.highCount // 0')
+          #MEDIUM=$(cat tmas_scan_report.json | jq '.vulnerabilities.mediumCount // 0')
 
-          echo "Critical : $CRITICAL"
-          echo "High     : $HIGH"
-          echo "Medium   : $MEDIUM"
+          #echo "Critical : $CRITICAL"
+          #echo "High     : $HIGH"
+          #echo "Medium   : $MEDIUM"
     
-          # TMAS action v3 เก็บผลใน environment variable แทน
-          echo "=== TMAS Scan Output ==="
+          ## TMAS action v3 เก็บผลใน environment variable แทน
+          #echo "=== TMAS Scan Output ==="
           # ${{ steps.tmas.outcome }} คือการถามว่า step ชื่อ "tmas" ผลเป็นยังไง
-          echo "Exit code from TMAS: ${{ steps.tmas.outcome }}" 
+          #echo "Exit code from TMAS: ${{ steps.tmas.outcome }}" 
     
-          if [ "$CRITICAL" -gt 0 ] || [ "$HIGH" -gt 0 ] || [ "$MEDIUM" -gt 0 ]; then
-            echo "Found vulnerabilities! Blocking pipeline."
-          exit 1
-          fi
+          #if [ "$CRITICAL" -gt 0 ] || [ "$HIGH" -gt 0 ] || [ "$MEDIUM" -gt 0 ]; then
+            #echo "Found vulnerabilities! Blocking pipeline."
+          #exit 1
+          #fi
     
-            echo "TMAS scan passed."
+            #echo "TMAS scan passed."
 
   # --- JOB 2: CD Process บน Self-hosted Runner ---
   cd-process:

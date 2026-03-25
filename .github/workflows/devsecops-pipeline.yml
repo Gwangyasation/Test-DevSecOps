@@ -102,6 +102,8 @@ jobs:
         run: |
           # ✅ ใช้ envsubst แทนค่า $DOCKERHUB_USERNAME ใน deployment.yaml ก่อน apply
           envsubst < k8s/deployment.yaml | kubectl apply -f -
+          kubectl apply -f k8s/service.yaml
+          kubectl apply -f k8s/ingress.yaml
 
           # สั่ง Restart เพื่อให้ดึง Image ล่าสุดมาใช้
           kubectl rollout restart deployment/myapp-deployment

@@ -112,12 +112,20 @@ jobs:
           kubectl rollout status deployment/myapp-deployment
 
     # 4. Forward port for Kubernetes
+      #- name: Forward Port for Kubernetes
+        #run: |
+          # 1. ค้นหาและปิดการทำงานของ port-forward ตัวเก่าก่อน (ถ้ามี)
+          #pkill -f "kubectl port-forward" || true
+          # 2. ปิด process ที่ใช้ port 30010 อยู่
+          #fuser -k 30010/tcp || true
+          #sleep 2
+          # 3. รัน port-forward ใหม่
+          #kubectl port-forward --address 0.0.0.0 service/myapp-service 30011:80 &
+
       - name: Forward Port for Kubernetes
         run: |
-          # 1. ค้นหาและปิดการทำงานของ port-forward ตัวเก่าก่อน (ถ้ามี)
           pkill -f "kubectl port-forward" || true
-          # 2. ปิด process ที่ใช้ port 30010 อยู่
-          fuser -k 30010/tcp || true
           sleep 2
-          # 3. รัน port-forward ใหม่
-          kubectl port-forward --address 0.0.0.0 service/myapp-service 30011:80 &
+          # ← เปลี่ยนจาก 30011 เป็น 80
+          kubectl port-forward --address 0.0.0.0 \
+          service/myapp-service 80:80 &

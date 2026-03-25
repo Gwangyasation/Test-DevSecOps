@@ -90,7 +90,7 @@ jobs:
       - name: Pull image from Docker Hub
         run: docker pull ${{ secrets.DOCKERHUB_USERNAME }}/node-remote-test:latest
 
-      2. Check Minikube status
+      #2. Check Minikube status
       - name: Check Minikube status
         run: |
           minikube status || minikube start

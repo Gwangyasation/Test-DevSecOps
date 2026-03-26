@@ -122,18 +122,18 @@ jobs:
           # 3. รัน port-forward ใหม่
           #kubectl port-forward --address 0.0.0.0 service/myapp-service 30011:80 &
 
-      - name: Start Port Forward
+      # 3. Deploy to Kubernetes
+      - name: Deploy to Kubernetes
         run: |
-          sudo pkill -f "kubectl port-forward" || true
-          sleep 2
-            
-          # รัน port-forward ให้ Service (พอร์ต 80) ออกไปที่พอร์ต 80 ของเครื่อง VM
-          # และใช้ & เพื่อให้รันเป็น Background process
-          sudo nohup kubectl port-forward --address 0.0.0.0 service/myapp-service 80:80 --kubeconfig=/home/g2248orakarn/.kube/config > /tmp/port-forward.log 2>&1 &
-            
-          # สำหรับพอร์ต 443 (ถ้าแอปคุณรองรับ HTTPS)
-          sudo nohup kubectl port-forward --address 0.0.0.0 service/myapp-service 443:443 --kubeconfig=/home/g2248orakarn/.kube/config > /tmp/port-forward-443.log 2>&1 &
+          envsubst < k8s/deployment.yaml | kubectl apply -f -
+          kubectl apply -f k8s/service.yaml
+          # ไม่ต้องมี kubectl apply -f k8s/ingress.yaml ถ้าจะเอาแค่พอร์ต 80 ก่อน
 
-          sleep 3
-          echo "Port forward started on port 80"
-          curl -s localhost | head -3
+          kubectl rollout restart deployment/myapp-deployment
+          kubectl rollout status deployment/myapp-deployment
+
+      # 4. ตรวจสอบสถานะ (ไม่ต้องใช้ sudo port-forward แล้ว)
+      - name: Verify Service
+        run: |
+          kubectl get svc myapp-service
+          echo "Service is updated. Access via VM IP on port 80"

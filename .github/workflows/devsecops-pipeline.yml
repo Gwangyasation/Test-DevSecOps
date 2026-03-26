@@ -124,17 +124,16 @@ jobs:
 
       - name: Start Port Forward
         run: |
-            # ปิดตัวเก่าก่อน
-            pkill -f "kubectl port-forward" || true
-            sleep 2
+          sudo pkill -f "kubectl port-forward" || true
+          sleep 2
+            
+          # รัน port-forward ให้ Service (พอร์ต 80) ออกไปที่พอร์ต 80 ของเครื่อง VM
+          # และใช้ & เพื่อให้รันเป็น Background process
+          sudo nohup kubectl port-forward --address 0.0.0.0 service/myapp-service 80:80 --kubeconfig=/home/g2248orakarn/.kube/config > /tmp/port-forward.log 2>&1 &
+            
+          # สำหรับพอร์ต 443 (ถ้าแอปคุณรองรับ HTTPS)
+          sudo nohup kubectl port-forward --address 0.0.0.0 service/myapp-service 443:443 --kubeconfig=/home/g2248orakarn/.kube/config > /tmp/port-forward-443.log 2>&1 &
 
-            # รัน port-forward port 80 ด้วย sudo + KUBECONFIG
-            nohup sudo KUBECONFIG=/home/g2248orakarn/.kube/config \
-            kubectl port-forward \
-            --address 0.0.0.0 \
-            service/myapp-service 80:80 \
-            > /tmp/port-forward.log 2>&1 &
-
-            sleep 3
-            echo "Port forward started on port 80"
-            curl -s localhost | head -3
+          sleep 3
+          echo "Port forward started on port 80"
+          curl -s localhost | head -3

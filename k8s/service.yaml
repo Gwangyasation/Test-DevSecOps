@@ -1,12 +1,13 @@
+# service.yaml
 apiVersion: v1
 kind: Service
 metadata:
   name: myapp-service
 spec:
-  type: LoadBalancer      # ← เปลี่ยนจาก NodePort เป็น ClusterIP
+  type: ClusterIP  # เปลี่ยนจาก LoadBalancer เป็น ClusterIP
   selector:
     app: myapp
   ports:
     - protocol: TCP
-      port: 80
-      targetPort: 3000
+      port: 80         # พอร์ตที่ Service รับจาก Ingress
+      targetPort: 3000 # พอร์ตที่แอปใน Container รันอยู่

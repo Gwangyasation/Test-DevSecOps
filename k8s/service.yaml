@@ -4,7 +4,7 @@ kind: Service
 metadata:
   name: myapp-service
 spec:
-  type: ClusterIP  # เปลี่ยนจาก LoadBalancer เป็น ClusterIP
+  type: LoadBalancer  # เปลี่ยนจาก LoadBalancer เป็น ClusterIP
   selector:
     app: myapp
   ports:

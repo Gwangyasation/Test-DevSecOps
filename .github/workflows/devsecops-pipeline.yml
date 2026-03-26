@@ -122,10 +122,19 @@ jobs:
           # 3. รัน port-forward ใหม่
           #kubectl port-forward --address 0.0.0.0 service/myapp-service 30011:80 &
 
-      - name: Forward Port for Kubernetes
+      - name: Start Port Forward
         run: |
-          pkill -f "kubectl port-forward" || true
-          sleep 2
-          # ← เปลี่ยนจาก 30011 เป็น 80
-          kubectl port-forward --address 0.0.0.0 \
-          service/myapp-service 80:80 &
+            # ปิดตัวเก่าก่อน
+            pkill -f "kubectl port-forward" || true
+            sleep 2
+
+            # รัน port-forward port 80 ด้วย sudo + KUBECONFIG
+            nohup sudo KUBECONFIG=/home/g2248orakarn/.kube/config \
+            kubectl port-forward \
+            --address 0.0.0.0 \
+            service/myapp-service 80:80 \
+            > /tmp/port-forward.log 2>&1 &
+
+            sleep 3
+            echo "Port forward started on port 80"
+            curl -s localhost | head -3

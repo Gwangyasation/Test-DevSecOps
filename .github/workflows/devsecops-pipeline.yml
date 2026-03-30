@@ -48,12 +48,15 @@ jobs:
 
       - name: Stop Old Container
         run: |
-          docker stop my-app-container || true
-          docker rm my-app-container || true
+          #docker stop my-app-container || true
+          #docker rm my-app-container || true
+          sudo docker stop myapp || true && sudo docker rm myapp || true
 
       - name: Start New Container
         run: |
-          docker run -d \
+          #docker run -d \
             --name my-app-container \
             -p 3000:3000 \
             ${{ secrets.DOCKERHUB_USERNAME }}/node-remote-test:latest
+
+          sudo docker run -d --name myapp -p 80:3000 ${{ secrets.DOCKERHUB_USERNAME }}/node-remote-test:latest

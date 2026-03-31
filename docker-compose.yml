@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  node-app:
+    build: .
+    expose:
+      - "3000" # เปิดพอร์ตแค่ภายใน Network ของ Docker (คนนอกเข้าไม่ได้)
+
+  nginx-proxy:
+    image: nginx:alpine
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "80:80" # คนนอกเข้าผ่านพอร์ต 80 ของ Nginx
+    depends_on:
+      - node-app
